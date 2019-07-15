@@ -2,6 +2,8 @@
 
 Ce projet est un TP étape par étape permettant de découvrir Spring Boot.
 
+Ce TP a été réalisé avec la version Spring Boot : 2.1.6.RELEASE.
+
 ## Pré-requis
 
 - Maven 3.x
@@ -14,15 +16,15 @@ Il n'est pas nécessaire de cloner le projet, la description des étapes doit pe
 
 Les étapes :
 
-1. [Etape 1 - Spring Boot avec le client Spring](#etape-1)
-2. [Etape 2 : Un 1er projet Spring Boot en Java](#etape-2)
-3. [Etape 3 : Mise en place d'un 1er test d'intégration](#etape-3)
-4. [Etape 4 : Mise en place de JPA](#etape-4)
-5. [Etape 5 : Mise en place Spring Security](#etape-5)
-6. [Etape 6 : Mise en place d'Actuator](#etape-6)
+1. [Etape 1 - Spring Boot avec le client Spring](#etape-1---client-spring)
+2. [Etape 2 : Un 1er projet Spring Boot en Java](#etape-2---1er-projet-Spring-Boot)
+3. [Etape 3 : Mise en place d'un 1er test d'intégration](#etape-3---test-intégration)
+4. [Etape 4 : Mise en place de JPA](#etape-4---jpa)
+5. [Etape 5 : Mise en place Spring Security](#etape-5---spring-security)
+6. [Etape 6 : Mise en place d'Actuator](#etape-6---spring-actuator)
 
 
-### Etape 1
+### Etape 1 - Client Spring
 
 #### Mise en place du client Spring
 
@@ -81,7 +83,7 @@ spring run app.groovy -- --server.port=9000
 
 
 
-### Etape 2
+### Etape 2 - 1er projet Spring Boot
 
 #### Mise en place du squelette de projet
 
@@ -124,7 +126,7 @@ private String name;
 
 - Vérifier le bon fonctionnement en lançant l'application à l'url http://localhost:8080
 
-### Etape 3
+### Etape 3 - Test Intégration
 
 Créer un test d'intégration pour le controller "DemoController"
 
@@ -150,7 +152,7 @@ Créer un test d'intégration pour le controller "DemoController"
 
 - Lancer le test d'intégration via Intellij
 
-### Etape 4
+### Etape 4 - JPA
 
 - Aller dans le pom.xml et rajouter le starter spring-boot-starter-data-jpa 
 ```
@@ -160,7 +162,7 @@ Créer un test d'intégration pour le controller "DemoController"
                 </dependency>
 ```        
 
-- Rajouter la dépendance à la base de données h2 
+- Rajouter la dépendance à la base de données h2 dans le pom.xml
 ```        
 		<dependency>
 			<groupId>com.h2database</groupId>
@@ -168,21 +170,41 @@ Créer un test d'intégration pour le controller "DemoController"
 			<scope>runtime</scope>
 		</dependency>
 ```        
+=> H2 est une base de données embarquée (déjà utilisée lors du TP JPA)
 
-=> Pas besoin de spécifier la version 
+=> Pas besoin de spécifier la version, Spring Boot s'en occupe
 
 => Le scope est runtime
 
 => Le starter JPA ne propose pas de base de données par défaut
 
+- Créer une classe Java Student avec les champs id (Long), firstName (String), lastName (String) et twitterId (String)
+- Définir cette classe comme une entité (`@Entity`)
+    - Rappel : il faut avoir un constructeur vide et des getters/setters sur les différents champs
+- Définir le champ Id comme identifiant (`@Id`), avec également l'annotation `@GeneratedValue`
 
-==============================================
+- Créer une interface StudentRepository qui étend `CrudRepository`
+- Rajouter les méthodes `Collection<Student> findByLastName()` et `Student findByTwitterId()`
+    - => Spring JPA nous offre un certain nombre de méthodes à disposition, pas besoin de les implémenter
 
-TODO A COMPLETER AVEC LES TESTS ET CIE....
 
-==============================================
+- Créer un test unitaire pour vérifier le bon fonctionnement de StudentRepository
+    - la classe doit avoir les annotations `@RunWith(SpringJUnit4ClassRunner.class)` et `@SpringBootTest`
+    - injecter le `StudentRepository`avec l'annotation @Autowired (assez proche du @Inject)
+    - compléter le code ci-dessous 
+```
+    @Test
+    public void testFindByTwitterId(){
 
-### Etape 5
+        Student myStudent = ... TODO A COMPLETER
+
+        assertThat(studentRepository.findByTwitterId("monTwitterId").getId()).isEqualTo(myStudent.getId());
+    }
+```
+
+- Exécuter le test
+
+### Etape 5 - Spring Security
 
 - Ajouter le starter spring-boot-starter-security dans le pom.xml
 
@@ -191,51 +213,74 @@ TODO A COMPLETER AVEC LES TESTS ET CIE....
 - se connecter avec le compte 'user' et le mot de passe correspondant (affiché dans les logs). Ce comportement n'est pas satisfaisant. Spring Boot ne fait pas de choix par défaut pour nous, il nous faut avoir une "opinion"
 
 
-- Rajouter la config avec une authentification en mémoire
+- Rajouter une configuration avec une authentification en mémoire dans la classe principale de l'application
 
-TODO
+```
+	@Configuration
+	static class SecurityConfig extends GlobalAuthenticationConfigurerAdapter {
 
-voir https://www.mkyong.com/spring-boot/spring-security-there-is-no-passwordencoder-mapped-for-the-id-null/ 
+		@Override
+		public void init(AuthenticationManagerBuilder auth) throws Exception {
+			auth.inMemoryAuthentication()
+            .withUser("fred").password("{noop}fred").roles("USER")
+					.and().
+            withUser("hero").password("{noop}hero").roles("USER","HERO", "ADMIN");
+		}
+
+	}
+```
+
+Note : le `{noop}`permet de stocker en plain text le mot de passe (pour des tests, cette configuration ne doit pas être mise en place en production)
+
+cf https://www.mkyong.com/spring-boot/spring-security-there-is-no-passwordencoder-mapped-for-the-id-null/ 
+
+
+- Lancer l'application et vérifier qu'on peut accéder à la page principale
 
 - Vérifier les tests...
+    - Remplacer RestTemplate par la classe utilitaire RestTestTemplate qui permet de spécifier un user et un mot de passe
 
-  remplacer RestTemplate par la classe utilitaire RestTestTemplate qui permet de spécifier un user et un mot de passe
+- Sécuriser le point d'entrée de l'application avec le rôle HERO : - rajouter l'annotation @Secured avec le rôle HERO sur cette méthode
 
+```
+@Secured("ROLE_HERO")
+@RequestMapping("/")
+```
 
-- Sécuriser une méthode (le point d'entrée) le rôle HERO
-
-- rajouter l'annotation @Secured avec le rôle HERO sur cette méthode
-    - Attention : si vous avez créé le user avec .roles("HERO"), le nom du rôle est ROLE_HERO (ROLE_ est automatiquement rajouté)
-
+=> Attention : si vous avez créé le user avec .roles("HERO"), le nom du rôle est ROLE_HERO (ROLE_ est automatiquement rajouté)
 
 - Dans la classe principale de l'application, activer cette sécurisation avec l'annotation Spring Security suivante :
 ```
 @EnableGlobalMethodSecurity(securedEnabled = true)
 ```
- - verifier que le point d'entrée est accessible avec l'utilsateur hero
 
- - relancer le test d'intégration, corriger le 
+ - Verifier que le point d'entrée est accessible avec l'utilsateur hero
 
-### Etape 6
+ - Relancer le test d'intégration, corriger le 
+
+### Etape 6 - Spring Actuator
 
 
 - Ajouter le starter actuator dans le pom.xml
 
-- relancer l'application et essayer d'atteindre le endpoint http://localhost:8080/env. Cet endpoint n'est accessible que pour le rôle ADMIN
+- relancer l'application et essayer d'atteindre le endpoint http://localhost:8080/actuator/info. Cet endpoint n'est accessible qu'avec le rôle ADMIN
 
-- il faut à présent ajouter le rôle ADMIN à l'un de nos users (par exemple hero)
-
-
-voir https://www.baeldung.com/spring-boot-actuators
-
-http://localhost:8080/actuator/health
-http://localhost:8080/actuator/env
-http://localhost:8080/actuator/beans
-#management.endpoints.enabled-by-default=true
+- Modifier le fichier application.properties afin que tous les endpoints Actuator soient disponibles
 ```
 management.endpoints.web.exposure.include=*
 
 ```
+- Relancer l'application et vérifier quelques endpoints Actuator sont disponibles :
+
+    - http://localhost:8080/actuator/health
+    - http://localhost:8080/actuator/env
+    - http://localhost:8080/actuator/beans
+    - http://localhost:8080/actuator/metrics
+    - http://localhost:8080/actuator/heapdump
+
+
+
+voir aussi https://www.baeldung.com/spring-boot-actuators
 
 
 
