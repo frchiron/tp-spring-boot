@@ -1,0 +1,21 @@
+= Spring Boot
+
+== Objectifs
+
+- Apporte une expérience "Getting Started" très rapide et accessible au plus grand nombre
+
+ - Propose un choix par défaut, mais il est simple de modifier la configuration si vos choix divergent
+
+- Fournit un ensemble de fonctionnalités "non-fonctionnels" qui sont communes à un grand nombre de projets (e.g. serveurs embarqués, sécurité, metriques, health
+checks, ...)
+
+ - Pas de génération de code et Pas besoin de configuration XML
+
+
+== Historique
+
+
+- Avril 2014 : Spring Boot 1.0
+- Janvier 2017 : Spring Boot 1.5
+- Mars 2018 : Spring Boot 2.0
+- Actuellement : Spring Boot 2.2
