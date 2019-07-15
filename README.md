@@ -12,12 +12,17 @@ Ce projet est un TP étape par étape permettant de découvrir Spring Boot.
 
 Il n'est pas nécessaire de cloner le projet, la description des étapes doit permettre de réaliser l'application étape par étape.
 
-Néanmoins un correctif est disponible pour chaque étape dans une branche git dédiée.
+Les étapes :
 
-## Etapes
+1. [Etape 1 - Spring Boot avec le client Spring](#etape-1)
+2. [Etape 2 : Un 1er projet Spring Boot en Java](#etape-2)
+3. [Etape 3 : Mise en place d'un 1er test d'intégration](#etape-3)
+4. [Etape 4 : Mise en place de JPA](#etape-4)
+5. [Etape 5 : Mise en place Spring Security](#etape-5)
+6. [Etape 6 : Mise en place d'Actuator](#etape-6)
 
 
-### Etape 1 - Spring Boot avec le client Spring
+### Etape 1
 
 #### Mise en place du client Spring
 
@@ -76,7 +81,7 @@ spring run app.groovy -- --server.port=9000
 
 
 
-### Etape 2 : Un 1er projet Spring Boot en Java
+### Etape 2
 
 #### Mise en place du squelette de projet
 
@@ -110,27 +115,42 @@ Pour information nous avons spécifié un Packaging Jar avec la dépendance Spri
 
 - Rajouter une variable name dans la classe DemoController, et afficher dans la réponse du Controller cette variable
 
-Utiliser l'annotation @Value et déclarer cette propriété dans l'application.properties
-TODO : A REFORMULER!!!
+- Utiliser ensuite l'annotation @Value et déclarer la propriété référencée dans l'application.properties
 
 ```
 @Value("${person.name:ESGI}")
+private String name;
 ```
 
+- Vérifier le bon fonctionnement en lançant l'application à l'url http://localhost:8080
 
-TODO : Ceci correspond à une SPEL (Spring Expression Language)
+### Etape 3
 
-### Etape 3 : Mise en place d'un 1er test d'intégration
+Créer un test d'intégration pour le controller "DemoController"
 
-- Créer un test d'intégration
-    - utilisation de @SpringBootTest pour charger le contexte et pour définir un port random
-    - utilisation de SPEL pour récupérer le port random
-    - utilisation de RestTemplate pour avoir un client de notre application
+- Créer une classe de test DemoControllerIntegrationTest
+- Cette classe doit être annotée avec
+`@RunWith(SpringJUnit4ClassRunner.class)`
+- Cette classe doit également être annotée avec 
+`@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)`. Le paramètre SpringBootTest.WebEnvironment.RANDOM_PORT permet d'indiquer qu'on va utiliser un port random pour lancer l'application. Cette annotation permet de lancer des tests d'intégration Spring Boot (chargement du contexte Spring notamment)
 
-    TODO à compléter avec un exemple
+- Créer une méthode de test, annotée avec `@Test`   
+```
+    @Test
+    public void should_return_welcome_message(){
+        String url = ... TODO A COMPLETER
+        String body = new RestTemplate().getForObject(url,String.class);
+        assertThat(body).contains(... TODO A COMPLETER);
+    }
+```
+=> Les assertions sont effectuées via la librairie Assertj, fournies avec Spring Boot
+
+=> RestTemplate permet d'instancier un client Rest avec Spring. Ici on crée un client de notre application.
 
 
-### Etape 4 : Mise en place de JPA
+- Lancer le test d'intégration via Intellij
+
+### Etape 4
 
 - Aller dans le pom.xml et rajouter le starter spring-boot-starter-data-jpa 
 ```
@@ -162,7 +182,7 @@ TODO A COMPLETER AVEC LES TESTS ET CIE....
 
 ==============================================
 
-### Etape 5 : Mise en place Spring Security
+### Etape 5
 
 - Ajouter le starter spring-boot-starter-security dans le pom.xml
 
@@ -196,7 +216,7 @@ voir https://www.mkyong.com/spring-boot/spring-security-there-is-no-passwordenco
 
  - relancer le test d'intégration, corriger le 
 
-### Etape 6 : Mise en place d'Actuator
+### Etape 6
 
 
 - Ajouter le starter actuator dans le pom.xml
