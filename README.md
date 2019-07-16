@@ -145,6 +145,10 @@ Créer un test d'intégration pour le controller "DemoController"
         assertThat(body).contains(... TODO A COMPLETER);
     }
 ```
+HELP :
+  @Value("${local.server.port}")
+    private int port;
+
 => Les assertions sont effectuées via la librairie Assertj, fournies avec Spring Boot
 
 => RestTemplate permet d'instancier un client Rest avec Spring. Ici on crée un client de notre application.
