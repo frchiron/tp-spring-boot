@@ -158,7 +158,7 @@ Créer un test d'intégration pour le controller "DemoController"
 ```
                 <dependency>
                     <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-start-data-jpa<artifactId>
+                    <artifactId>spring-boot-starter-data-jpa<artifactId>
                 </dependency>
 ```        
 
